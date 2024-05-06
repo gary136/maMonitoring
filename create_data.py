@@ -6,30 +6,7 @@ from sqlalchemy.orm.session import Session
 import sys
 from twquant import stockindc as si
 from sqlalchemy.orm import sessionmaker
-from database_utils import create_engine_mysql, get_or_create_table, insert_data
-
-def fetch_and_insert_data(date, end_date, stock_data_table, engine, session, data_to_insert):
-    api_date = date.strftime('%Y%m%d')
-    existing_row = session.query(stock_data_table).filter(func.DATE(stock_data_table.c.stock_date) == api_date).first()
-    if existing_row:
-        print(f"Data for {api_date} already exists in the database. Skipping insertion.")
-        return 1
-
-    print(f"Fetching data for date: {api_date}", end = ' ')
-    df = si.Price(api_date, '上市')
-    if df is None:
-        print(f"No data available")
-        return 0
-    for index, row in df.iterrows():
-        data_to_insert.append({
-            'stock_date': row['股價日期'].date(),
-            'stock_code': row['證券代號'],
-            'closing_price': row['收盤價']
-        })
-    print("Inserting data into the database...")
-    insert_data(engine, stock_data_table, data_to_insert, session)
-    data_to_insert.clear()
-    return 1
+from database_utils import create_engine_mysql, get_or_create_table, insert_data, fetch_and_insert_data
 
 # Main function
 def main(end_date):
@@ -66,54 +43,10 @@ def main(end_date):
     if end_date is None:
         num_days = 3
         while date_processed < num_days:
-            # api_date = date.strftime('%Y%m%d')
-            # existing_row = session.query(stock_data_table).filter(func.DATE(stock_data_table.c.stock_date) == api_date).first()
-            # if existing_row:
-            #     print(f"Data for {api_date} already exists in the database. Skipping insertion.")
-            #     date_processed += 1
-            #     date -= timedelta(days=1)
-            #     continue
-            # print(f"Fetching data for date: {api_date}")
-            # df = si.Price(api_date, '上市')            
-            # if df is not None:
-            #     # If data is available for the given date
-            #     for index, row in df.iterrows():
-            #         data_to_insert.append({
-            #             'stock_date': row['股價日期'].date(),
-            #             'stock_code': row['證券代號'],
-            #             'closing_price': row['收盤價']
-            #         })
-            #     date_processed += 1
-            #     print("Inserting data into the database...")
-            #     insert_data(engine, stock_data_table, data_to_insert, session)
-            #     data_to_insert.clear()
-            # date -= timedelta(days=1)
-
             date_processed += fetch_and_insert_data(date, None, stock_data_table, engine, session, data_to_insert)
             date -= timedelta(days=1)
     else:
         while date > end_date:
-            # api_date = date.strftime('%Y%m%d')
-            # existing_row = session.query(stock_data_table).filter(func.DATE(stock_data_table.c.stock_date) == api_date).first()
-            # if existing_row:
-            #     print(f"Data for {api_date} already exists in the database. Skipping insertion.")
-            #     date -= timedelta(days=1)
-            #     continue
-            # print(f"Fetching data for date: {api_date}")
-            # df = si.Price(api_date, '上市')            
-            # if df is not None:
-            #     # If data is available for the given date
-            #     for index, row in df.iterrows():
-            #         data_to_insert.append({
-            #             'stock_date': row['股價日期'].date(),
-            #             'stock_code': row['證券代號'],
-            #             'closing_price': row['收盤價']
-            #         })
-            #     print("Inserting data into the database...")
-            #     insert_data(engine, stock_data_table, data_to_insert, session)
-            #     data_to_insert.clear()
-            # date -= timedelta(days=1)
-
             fetch_and_insert_data(date, end_date, stock_data_table, engine, session, data_to_insert)
             date -= timedelta(days=1)
     

@@ -1,5 +1,6 @@
-from sqlalchemy import create_engine, inspect, Table, Engine
+from sqlalchemy import create_engine, inspect, Table, Engine, func
 from sqlalchemy.orm.session import Session
+from twquant import stockindc as si
 
 username = 'root'
 password = ''
@@ -31,3 +32,26 @@ def insert_data(engine: Engine, table: Table, data: list, session: Session):
     with engine.connect() as conn:
         for item in data:
             session.execute(table.insert().values(item))
+
+def fetch_and_insert_data(date, end_date, stock_data_table, engine, session, data_to_insert):
+    api_date = date.strftime('%Y%m%d')
+    existing_row = session.query(stock_data_table).filter(func.DATE(stock_data_table.c.stock_date) == api_date).first()
+    if existing_row:
+        print(f"Data for {api_date} already exists in the database. Skipping insertion.")
+        return 1
+
+    print(f"Fetching data for date: {api_date}", end = ' ')
+    df = si.Price(api_date, '上市')
+    if df is None:
+        print(f"No data available")
+        return 0
+    for index, row in df.iterrows():
+        data_to_insert.append({
+            'stock_date': row['股價日期'].date(),
+            'stock_code': row['證券代號'],
+            'closing_price': row['收盤價']
+        })
+    print("Inserting data into the database...")
+    insert_data(engine, stock_data_table, data_to_insert, session)
+    data_to_insert.clear()
+    return 1

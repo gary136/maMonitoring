@@ -1,26 +1,12 @@
-from sqlalchemy import inspect, create_engine, Column, String, Float, Date, MetaData, Table
+from sqlalchemy import inspect, create_engine, Column, String, Float, Date, MetaData, Table, func
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm.session import Session
 import sys
 import pandas as pd
 from datetime import datetime, timedelta
 from sqlalchemy.orm import sessionmaker
-
-def create_engine_mysql() -> Engine:
-    engine = create_engine('mysql+pymysql://root:@localhost/twStock')
-    return engine
-
-def get_or_create_table(engine, metadata, table_name, columns) -> Table:
-    inspector = inspect(engine)
-    table_names = inspector.get_table_names()
-    if table_name in table_names:
-        print(f"The '{table_name}' table already exists.")
-        table = Table(table_name, metadata, autoload_with=engine)
-    else:
-        print(f"The '{table_name}' table does not exist. Creating a new table.")
-        table = Table(table_name, metadata, *columns)
-        table.create(engine)
-    return table
+from database_utils import create_engine_mysql, get_or_create_table, insert_data
+from collections import deque
 
 def calculate_ma3_and_insert(engine, stock_data_table, ma3_table, session, end_date):
     data_to_insert = []
@@ -29,30 +15,34 @@ def calculate_ma3_and_insert(engine, stock_data_table, ma3_table, session, end_d
         rows = query.fetchall()
 
         for stock_code, group in pd.DataFrame(rows).groupby('stock_code'):
-            dates = group['stock_date'].tolist()[:3]
-            prices = group['closing_price'].tolist()[:3]
-            # print(stock_code, dates, prices)
-            # for i in range(len(dates)):
-            if len(dates) == 3:
-                average_price = sum(prices) / 3
-                data_to_insert.append({
-                    'stock_date': dates[0],
-                    'stock_code': stock_code,
-                    'average_price': average_price
-                })
+            dates = group['stock_date'].tolist()
+            prices = group['closing_price'].tolist()
+            date_range = deque()
+            price_range = deque()
+            for i in range(len(dates)):
+                if i + 3 <= len(dates):
+                    existing_row = session.query(ma3_table).filter(func.DATE(ma3_table.c.stock_date) == dates[i]).first()
+                    if existing_row:
+                        print(f"Data for {dates[0]} {stock_code} already exists in the database. Skipping insertion.")
+                        continue
+                    if i == 0:
+                        for j in range(3):
+                            date_range.append(dates[j])
+                            price_range.append(prices[j])
+                    else:
+                        date_range.popleft()
+                        date_range.append(dates[i+2])
+                        price_range.popleft()
+                        price_range.append(prices[i+2])
+                    # print(date_range, price_range)
+                    average_price = sum(price_range) / 3
+                    data_to_insert.append({
+                        'stock_date': date_range[0],
+                        'stock_code': stock_code,
+                        'average_price': average_price
+                    })
         # print(data_to_insert)
         insert_data(engine, ma3_table, data_to_insert, session)
-
-# Function to insert data into MySQL table
-def insert_data(engine: Engine, table: Table, data: list, session: Session):
-    if not isinstance(engine, Engine):
-        raise TypeError("Argument 'engine' must be a SQLAlchemy Engine object.")
-    if not isinstance(data, list):
-        raise TypeError("Argument 'data' must be a list.")
-    with engine.connect() as conn:
-        # conn.execute(stock_data.insert(), data)
-        for item in data:
-            session.execute(table.insert().values(item))
 
 def main(end_date):
     print("Starting MA3 data creation process...")
@@ -67,7 +57,6 @@ def main(end_date):
         Column('stock_code', String(255)),
         Column('average_price', Float)
     ]
-
     stock_data_table = Table('stock_data', metadata, autoload_with=engine)
     stock_data_ma3 = get_or_create_table(engine, metadata, 'stock_data_ma3', stock_data_ma3_columns)
 

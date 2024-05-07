@@ -34,16 +34,15 @@ def main(end_date):
         
     date_processed = 0
     date = datetime.now().date()
-    data_to_insert = []
 
     if end_date is None:
         num_days = 3
         while date_processed < num_days:
-            date_processed += fetch_and_insert_data(date, None, stock_data_table, engine, session, data_to_insert)
+            date_processed += fetch_and_insert_data(date, stock_data_table, engine, session)
             date -= timedelta(days=1)
     else:
         while date > end_date:
-            fetch_and_insert_data(date, end_date, stock_data_table, engine, session, data_to_insert)
+            fetch_and_insert_data(date, stock_data_table, engine, session)
             date -= timedelta(days=1)
     
     print("Process completed!")

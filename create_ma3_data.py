@@ -34,14 +34,12 @@ def calculate_ma3_and_insert(engine, stock_data_table, ma3_table, session, end_d
                         date_range.append(dates[i+2])
                         price_range.popleft()
                         price_range.append(prices[i+2])
-                    # print(date_range, price_range)
                     average_price = sum(price_range) / 3
                     data_to_insert.append({
                         'stock_date': date_range[0],
                         'stock_code': stock_code,
                         'average_price': average_price
                     })
-        # print(data_to_insert)
         insert_data(engine, ma3_table, data_to_insert, session)
 
 def main(end_date):

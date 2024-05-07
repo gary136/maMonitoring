@@ -18,9 +18,6 @@ def main(end_date):
     Session = sessionmaker(bind=engine)
     session = Session()
 
-    # global stock_data
-    # stock_data = get_or_create_table(engine, metadata)
-
     stock_data_columns = [
         Column('stock_date', Date),
         Column('stock_code', String(255)),
@@ -35,7 +32,6 @@ def main(end_date):
         print("Terminating the program.")
         sys.exit(1)  # Terminate the program with a non-zero exit code
         
-    # end_date = datetime.now().date()
     date_processed = 0
     date = datetime.now().date()
     data_to_insert = []

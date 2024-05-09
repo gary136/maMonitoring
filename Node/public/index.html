@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Book Search</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <h1>TW Stocks monitoring based on moving average</h1>
+    <div class="search-wrapper">
+      <label for="search-by">MA</label>
+      <select id="search-by" defaultValue="20">
+        <option value="5">5</option>
+        <option value="10">10</option>
+        <option value="20" selected>20</option>
+        <option value="60">60</option>
+      </select>
+      <label for="search-direction">Direction</label>
+      <select id="search-direction" defaultValue="above">
+        <option value="above" selected>Above</option>
+        <option value="below">Below</option>
+      </select>
+      <input type="text" id="search-input" placeholder="Enter search value" defaultValue="10" />
+      <button id="search-btn">Search</button>
+    </div>
+    <div id="search-results"></div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="app.js"></script>
+  <script src="query.js"></script>
+</body>
+</html>

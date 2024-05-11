@@ -58,7 +58,7 @@ app.get('/stocks/:id', (req, res) => {
   });
 });
 
-// Route to search for stock
+// Route to search for stocks
 app.get('/stocks_search', (req, res) => {
   const searchBy = Object.keys(req.query)[0];
   const searchValue = req.query[searchBy];
@@ -77,12 +77,12 @@ app.get('/stocks_search', (req, res) => {
   });
 });
 
-// Route to search for stocks
+// Route to search for stocks with moving average
 app.get('/stocks_ma_search', (req, res) => {
   const searchBy = req.query['search-by'];
   const searchDirection = req.query['search-direction'];
   const searchValue = req.query['search-input'];
-  console.log("searchBy = " + searchBy + ", searchDirection = " + searchDirection + ", searchValue = " + searchValue);
+  // console.log("searchBy = " + searchBy + ", searchDirection = " + searchDirection + ", searchValue = " + searchValue);
 
   pool.getConnection((err, connection) => {
     if (err) throw err;

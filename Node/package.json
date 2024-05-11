@@ -1,12 +1,11 @@
 {
-  "name": "nodetest",
+  "name": "node_application",
   "version": "1.0.0",
   "description": "",
-  "main": "/public/app.js",
+  "main": "public/app.js",
   "scripts": {
-    "start": "node /public/app.js",
-    "dev": "nodemon /public/app.js",
-    "build": "react-scripts build",
+    "start": "node public/app.js",
+    "dev": "nodemon public/app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

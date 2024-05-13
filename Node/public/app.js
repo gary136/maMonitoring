@@ -18,8 +18,8 @@ app.use(express.static('public', {
 // Create a MySQL connection pool
 const pool = mysql.createPool({
   host: 'localhost',
-  user: 'root',
-  password: '',
+  user: 'admin',
+  password: '0000',
   database: 'twStock'
 });
 

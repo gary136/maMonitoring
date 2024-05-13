@@ -28,10 +28,12 @@ def main(window_size):
     # Get the latest date from the stock_data table
     with engine.connect() as conn:
         # check
-        date_range = conn.execute(select(stock_data.c.stock_date)
-                .where(stock_data.c.stock_date)
-                .group_by(stock_data.c.stock_date)
-                .order_by(stock_data.c.stock_date.desc())).fetchall()
+        date_range = conn.execute(
+            select(stock_data.c.stock_date)
+            .where(stock_data.c.stock_date)
+            .group_by(stock_data.c.stock_date)
+            .order_by(stock_data.c.stock_date.desc())
+        ).fetchall()
         # print(date_range)
         if len(date_range) < window_size:
             print("No enough data found in the stock_data table")

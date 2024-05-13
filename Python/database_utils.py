@@ -5,8 +5,8 @@ import pandas as pd
 from collections import deque
 from datetime import datetime
 
-username = 'root'
-password = ''
+username = 'admin'
+password = '0000'
 host = 'localhost'
 database_name = 'twStock'
 

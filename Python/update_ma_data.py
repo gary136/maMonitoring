@@ -40,10 +40,13 @@ def main(window_size):
         if len(date_range) < window_size:
             print("No enough data found in the stock_data table")
             return
-
     # Filter the date_range to include only dates greater than or equal to the max_ma_date
     if max_ma_date:
-        date_range = [d for d in date_range if d[0] >= max_ma_date]
+        # Find the index of max_ma_date in data_range        
+        max_ma_date_index = next((i for i, x in enumerate(date_range) if x[0] == max_ma_date), None)
+        date_range = date_range[:max_ma_date_index - 1 + window_size]
+        # date_range = [d for d in date_range if d[0] > max_ma_date]
+    # print(date_range)
 
     for i in range(len(date_range)):
         if i + window_size <= len(date_range):
